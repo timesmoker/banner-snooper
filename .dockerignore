@@ -1,0 +1,56 @@
+# --------------------
+# 🐍 Python 관련 캐시
+# --------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# --------------------
+# 🔐 민감정보
+# --------------------
+.env
+.env.*
+*.pem
+*.key
+*.crt
+secrets.json
+
+# --------------------
+# 💻 IDE/Editor 설정
+# --------------------
+.idea/
+.vscode/
+*.swp
+*.swo
+*.bak
+
+# --------------------
+# 🧪 테스트 결과 (선택)
+# --------------------
+/test
+.pytest_cache/
+.coverage
+htmlcov/
+.cache/
+*.log
+
+
+# --------------------
+# 📁 Git 자체
+# --------------------
+.git/
+.gitignore
+
+
+#------------------
+# 기타
+#------------------
+/naver_m_screenshots
+/naver_m_snapshots
+/naver_snapshots
