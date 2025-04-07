@@ -32,11 +32,12 @@ jobs:
 
           docker build -t banner-snooper .
 
-          docker run \  
+          docker run \
             -e DELAY=${{ vars.DELAY }} \
             -e GMAIL_ADDR=${{ secrets.GMAIL_ADDR }} \
             -e GMAIL_APP_PASSWORD=${{ secrets.GMAIL_APP_PASSWORD }} \
             -p 3000:3000 \
             --name banner-snooper-test \
-            banner-snooper
+            banner-snooper:latest
+
         EOF
