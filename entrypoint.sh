@@ -12,4 +12,4 @@ else
 fi
 
 # 실제 파이썬 실행
-python /app/banner_snooper.py
+python /app/engine.py

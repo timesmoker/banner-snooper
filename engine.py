@@ -1,5 +1,4 @@
 import time
-import random
 from datetime import datetime, timedelta
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -102,15 +101,10 @@ def send_today_screenshots():
         zip_filename=f"{os.path.basename(today_folder)}.zip"
     )
 
-    if result:
-        print("메일 전송 성공")
-    else:
-        print("메일 전송 실패")
-
 
 if __name__ == "__main__":
 
-    run_immediately = os.getenv("RUN_IMMEDIATELY", "false").lower() == "true"
+    run_immediately = os.getenv("DELAY", "true").lower() == "false"
 
     try:
         banner_snooper()
