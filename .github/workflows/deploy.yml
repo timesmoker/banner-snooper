@@ -31,8 +31,8 @@ jobs:
 
           docker run \  
             -e DELAY=true \               
-            -e SMTP_USER=${{ secrets.SMTP_USER }} \
-            -e SMTP_PASS=${{ secrets.SMTP_PASS }} \
+            -e GMAIL_ADDR=${{ secrets.GMAIL_ADDR }} \
+            -e GMAIL_APP_PASSWORD=${{ secrets.GMAIL_APP_PASSWORD }} \
             -p 3000:3000 \
             --name banner-snooper-test \
             banner-snooper
