@@ -23,7 +23,7 @@ jobs:
     - name: Deploy via SSH
       run: |
         ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-          cd ~/banner-snooper
+          cd $HOME/workspace/banner-snooper
           git pull origin main
 
           docker stop banner-snooper-test || true
