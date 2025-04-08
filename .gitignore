@@ -27,6 +27,7 @@ nosetests.xml
 # --------------------
 .env
 .env.*
+!/.env.example
 secrets.json
 *.pem
 *.crt
