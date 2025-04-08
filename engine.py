@@ -12,6 +12,7 @@ SAVE_FOLDER = "naver_m_snapshots"
 DA_PAGE_URL = "https://m.naver.com/"
 
 def banner_snooper():
+    print("배너 스누퍼 시작 : engine.py 진입")
     os.makedirs(SAVE_FOLDER, exist_ok=True)
     options = Options()
 
@@ -30,8 +31,8 @@ def banner_snooper():
     screenshot_folder_path = os.path.join(SCREENSHOT_FOLDER,date_now, f"{hour_now}~{hour_next}")
     os.makedirs(screenshot_folder_path, exist_ok=True)
 
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    naver_screenshotpath = os.path.join(screenshot_folder_path, f"m_naver_{timestamp}.png")
+    time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    naver_screenshotpath = os.path.join(screenshot_folder_path, f"m_naver_{time_stamp}.png")
     take_screenshot(driver, DA_PAGE_URL, naver_screenshotpath)
 
     link_element = None
@@ -53,12 +54,15 @@ def banner_snooper():
             print("링크 찾기 마저 실패")
 
 
-    # Now, locate the link inside the iframe
     landing_page_url = link_element.get_attribute('href')
 
+    time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    landing_page_screenshotpath = os.path.join(screenshot_folder_path, f"m_landing_page_{timestamp}.png")
+    link_log_path = os.path.join(screenshot_folder_path, "collected_links.txt")
+    with open(link_log_path, "a") as f:
+        f.write(f"[{time_stamp}] {landing_page_url}\n")
+
+    landing_page_screenshotpath = os.path.join(screenshot_folder_path, f"m_landing_page_{time_stamp}.png")
     take_screenshot(driver, landing_page_url, landing_page_screenshotpath)
 
     driver.quit()
