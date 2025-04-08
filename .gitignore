@@ -34,7 +34,7 @@ secrets.json
 *.key
 
 # --------------------
-# 🐳 Docker 관련 (실제 설정 파일은 제외하지 마!)
+# 🐳 Docker 관련
 # --------------------
 docker-compose.override.yml
 
