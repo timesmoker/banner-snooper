@@ -4,7 +4,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import timestamp
 import os
-
+from dotenv import load_dotenv
 from selenium.webdriver.common.by import By
 
 SCREENSHOT_FOLDER = "naver_m_screenshots"
@@ -13,6 +13,7 @@ DA_PAGE_URL = "https://m.naver.com/"
 
 def banner_snooper():
     print("배너 스누퍼 시작 : engine.py 진입")
+
     os.makedirs(SAVE_FOLDER, exist_ok=True)
     options = Options()
 
@@ -58,7 +59,7 @@ def banner_snooper():
 
     time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-    link_log_path = os.path.join(screenshot_folder_path, "collected_links.txt")
+    link_log_path = os.path.join(screenshot_folder_path, "collected_link.txt")
     with open(link_log_path, "a") as f:
         f.write(f"[{time_stamp}] {landing_page_url}\n")
 
@@ -82,22 +83,24 @@ def take_screenshot(driver, target_url, save_path):
 
 def send_today_screenshots():
     from mail_utils.send_mail import send_mail
-    from dotenv import load_dotenv
 
-    load_dotenv()
+    print("메일 발송 시작")
     gmail = os.getenv("GMAIL_ADDR")
     password = os.getenv("GMAIL_APP_PASSWORD")
-    to = gmail  # 보내야 하는 주소
+    to = os.getenv("TO_ADDR")  # 보내야 하는 주소
+
+    to_list = [to,gmail]
 
     today_folder = os.path.join("naver_m_screenshots", datetime.now().strftime("%Y-%m-%d"))
+
     if not os.path.isdir(today_folder):
-        print("오늘 폴더 없음:", today_folder)
+        print("저장폴더 없음 :", today_folder)
         return
 
-    result = send_mail(
+    send_mail(
         gmail_addr=gmail,
         gmail_app_password=password,
-        to_address=to,
+        to_address=to_list,
         subject=f"[자동 발송] {os.path.basename(today_folder)} naver 배너 모음",
         body=f" {os.path.basename(today_folder)} 의 네이버 배너와 랜딩 페이지 스크린샷입니다.",
         attachments=today_folder,
@@ -107,17 +110,18 @@ def send_today_screenshots():
 
 
 if __name__ == "__main__":
-
-    run_immediately = os.getenv("DELAY", "true").lower() == "false"
+    load_dotenv()
+    DELAY = os.getenv("DELAY", "true").lower() == "true"
 
     try:
         banner_snooper()
 
-        if run_immediately:
-            send_today_screenshots()
-        else:
-            if datetime.now().hour == 20:  # 정시 조건 (8시에만 실행)
+        if DELAY:
+            if datetime.now().hour == 20:
                 send_today_screenshots()
+        else:
+            print("딜레이 없이 메일 발송 (테스트 모드)")
+            send_today_screenshots()
 
     except Exception as e:
         print(f"에러 발생: {e}")

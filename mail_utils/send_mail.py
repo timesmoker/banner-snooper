@@ -2,22 +2,32 @@ import os
 import smtplib
 from email.message import EmailMessage
 import mimetypes
+from typing import Union
+
 from .zip_utils import make_auto_clean_zip, collect_files_from_dir
 
 def send_mail(
     gmail_addr: str,
     gmail_app_password: str,
-    to_address: str,
+    to_address: Union[str, list[str]],
     subject: str,
     body: str,
     *,
-    attachments: list[str] = None,
+    attachments: Union[str,list[str]] = None,
     make_zip: bool = False,
     zip_filename: str = "attachments.zip"
 ) -> bool:
+
     msg = EmailMessage()
     msg["From"] = gmail_addr
-    msg["To"] = to_address
+
+
+    if isinstance(to_address, list):
+        msg["To"] = ", ".join(addr.strip() for addr in to_address)
+    elif isinstance(to_address, str):
+        msg["To"] = to_address.strip()
+
+
     msg["Subject"] = subject
     msg.set_content(body)
 
@@ -59,6 +69,7 @@ def send_mail(
             smtp.send_message(msg)
             print("메일 전송 성공")
             return True
+
     except Exception as e:
         print(f"메일 전송 실패: {e}")
         return False

@@ -6,7 +6,7 @@ import io
 def make_auto_clean_zip(files: list[str]) -> bytes:
     buffer = io.BytesIO()
     try:
-        common_root = os.path.commonpath(files)  # ✅ 공통 경로 자동 추출
+        common_root = os.path.commonpath(files)  #  공통 경로 추출
 
         with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
             for file in files:

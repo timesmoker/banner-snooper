@@ -7,7 +7,7 @@ import locale
 try:
     locale.setlocale(locale.LC_TIME, 'ko_KR.UTF-8')
 except locale.Error:
-    print("⚠ 한글 locale 설정 실패 → 영어로 출력됩니다.")
+    print("한글 locale 설정 실패 → 영어로 출력됩니다.")
 
 def get_font(size=18):
     font_paths = [
@@ -67,4 +67,4 @@ def overlay_time_with_header(image_path):
     modified_path = f"{base}_modified{ext}"
     new_image.save(modified_path)
 
-    print(f"✅ 상단 헤더(검정) 저장 완료: {modified_path}")
+    print(f"상단 헤더(검정) 저장 완료: {modified_path}")
