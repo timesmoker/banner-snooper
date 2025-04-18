@@ -63,8 +63,6 @@ def overlay_time_with_header(image_path):
 
     new_image.paste(original_image, (0, header_height))
 
-    base, ext = os.path.splitext(image_path)
-    modified_path = f"{base}_modified{ext}"
-    new_image.save(modified_path)
+    new_image.save(image_path)
 
-    print(f"상단 헤더(검정) 저장 완료: {modified_path}")
+    print(f"이미지 저장 완료: {image_path}")
