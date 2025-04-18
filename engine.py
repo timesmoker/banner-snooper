@@ -77,14 +77,6 @@ def take_screenshot(driver, target_url, save_path):
         time.sleep(5)  # Adjust this sleep time as needed based on your network speed
     except Exception as e:
         print(f"URL 접근 실패: {target_url}, 에러: {e}")
-        print("2초 대기 후 재시도")
-        time.sleep(2)
-        try:
-            driver.get(target_url)
-            time.sleep(5)  # Adjust this sleep time as needed based on your network speed
-        except Exception as e:
-            print(f"URL 접근 재시도 실패: {target_url}, 에러: {e}")
-            return
 
     driver.get_screenshot_as_file(save_path)
 

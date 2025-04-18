@@ -2,7 +2,7 @@ name: Deploy to EC2
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
 
   workflow_dispatch:
 
@@ -24,7 +24,7 @@ jobs:
       run: |
         ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
           cd $HOME/workspace/banner-snooper
-          git pull origin master
+          git pull origin main
 
           docker stop banner-snooper-test || true
           docker rm banner-snooper-test || true
