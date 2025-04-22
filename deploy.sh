@@ -2,7 +2,7 @@
 
 # .env.GHCR 파일 불러오기
 set -a
-source /home/timesmoker/.envs/.env.ghcr
+source /home/timesmoker/.envs/.env.ghcr.bannersnooper
 set +a
 
 # GHCR 로그인
