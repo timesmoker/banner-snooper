@@ -1,15 +1,9 @@
 import time
 from datetime import datetime, timedelta
-from selenium import webdriver
-from selenium.common import TimeoutException
-from selenium.webdriver.chrome.options import Options
-
-import timestamp
+from playwright.sync_api import sync_playwright
 import os
+import timestamp
 from dotenv import load_dotenv
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 
 SCREENSHOT_FOLDER = "naver_m_screenshots"
 SAVE_FOLDER = "naver_m_snapshots"
@@ -19,77 +13,76 @@ def banner_snooper():
     print("배너 스누퍼 시작 : engine.py 진입")
 
     os.makedirs(SAVE_FOLDER, exist_ok=True)
-    options = Options()
-    options.add_argument("--headless")
-    options.add_argument("--disable-gpu")
-    options.add_argument('--no-sandbox')
-    options.add_experimental_option("mobileEmulation", {"deviceName": "iPhone 8"})
-    driver = webdriver.Chrome(options=options)
 
-    try:
-        time_now = datetime.now()
-        date_now = time_now.strftime("%Y-%m-%d")
-        hour_now = time_now.strftime("%H")
-        hour_next = (time_now + timedelta(hours=1)).strftime("%H")
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        context = browser.new_context(
+            viewport={'width': 375, 'height': 667},
+            user_agent='Mozilla/5.0 (iPhone; CPU iPhone OS 13_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.1.2 Mobile/15E148 Safari/604.1'
+        )
+        page = context.new_page()
 
-        screenshot_folder_path = os.path.join(SCREENSHOT_FOLDER, date_now, f"{hour_now}~{hour_next}")
-        os.makedirs(screenshot_folder_path, exist_ok=True)
-
-        time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        naver_screenshotpath = os.path.join(screenshot_folder_path, f"m_naver_{time_stamp}.png")
-        take_screenshot(driver, DA_PAGE_URL, naver_screenshotpath, is_landing_page=False)
-
-        link_element = None
         try:
-            iframe = driver.find_element(By.XPATH, "//div[@id='main_search_specialda_1']//iframe[starts-with(@id, 'main_search_specialda_1_')]")
-            print("iframe 찾기 성공")
+            time_now = datetime.now()
+            date_now = time_now.strftime("%Y-%m-%d")
+            hour_now = time_now.strftime("%H")
+            hour_next = (time_now + timedelta(hours=1)).strftime("%H")
 
-            driver.switch_to.frame(iframe)
-            print("iframe 전환 성공")
+            screenshot_folder_path = os.path.join(SCREENSHOT_FOLDER, date_now, f"{hour_now}~{hour_next}")
+            os.makedirs(screenshot_folder_path, exist_ok=True)
 
-            link_element = driver.find_element(By.XPATH, "//a[@href]")
-        except:
-            print("iframe 찾기 실패")
+            time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            naver_screenshotpath = os.path.join(screenshot_folder_path, f"m_naver_{time_stamp}.png")
+
+            take_screenshot(page, DA_PAGE_URL, naver_screenshotpath, is_landing_page=False)
+
+            # 링크 추출
             try:
-                link_element = driver.find_element(By.XPATH, "//*[@id='main_search_specialda_1']//a[@href]")
-                print("링크 찾기 성공")
+                frame = page.frame_locator("//iframe[starts-with(@id, 'main_search_specialda_1_')]")
+                link_element = frame.locator("//a[@href]").first
+                landing_page_url = link_element.get_attribute('href')
+                print(f"iframe 링크 추출 성공: {landing_page_url}")
             except:
-                print("링크 찾기 마저 실패")
+                print("iframe 링크 추출 실패, 메인 페이지에서 찾기 시도")
+                try:
+                    link_element = page.locator("//*[@id='main_search_specialda_1']//a[@href]").first
+                    landing_page_url = link_element.get_attribute('href')
+                    print(f"링크 추출 성공: {landing_page_url}")
+                except:
+                    print("링크 추출 실패")
+                    return
 
-        landing_page_url = link_element.get_attribute('href')
-        time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            # 링크 저장
+            link_log_path = os.path.join(screenshot_folder_path, "collected_link.txt")
+            with open(link_log_path, "a") as f:
+                f.write(f"[{time_stamp}] {landing_page_url}\n")
 
-        link_log_path = os.path.join(screenshot_folder_path, "collected_link.txt")
-        with open(link_log_path, "a") as f:
-            f.write(f"[{time_stamp}] {landing_page_url}\n")
+            # 랜딩 페이지 스크린샷
+            landing_page_screenshotpath = os.path.join(screenshot_folder_path, f"m_landing_page_{time_stamp}.png")
+            page.goto(landing_page_url)
+            take_screenshot(page, landing_page_url, landing_page_screenshotpath, is_landing_page=True)
 
-        landing_page_screenshotpath = os.path.join(screenshot_folder_path, f"m_landing_page_{time_stamp}.png")
-
-        driver.get(landing_page_url)
-        take_screenshot(driver, landing_page_url, landing_page_screenshotpath, is_landing_page=True)
-
-    finally:
-        driver.quit()
+        finally:
+            browser.close()
+            print("브라우저 정상 종료")
 
 
-def take_screenshot(driver, target_url, save_path, is_landing_page=False):
-
+def take_screenshot(page, target_url, save_path, is_landing_page=False):
     try:
-        driver.get(target_url)
-        time.sleep(20)  # Adjust this sleep time as needed based on your network speed
+        page.goto(target_url)
+        time.sleep(20)  # 네트워크 속도에 맞춰 조정
 
         if is_landing_page:
-            handle_cookie_banner(driver)
+            handle_cookie_banner(page)
         else:
-            close_button_if_exists(driver)
+            close_button_if_exists(page)
+
+        page.screenshot(path=save_path)
+        print(f"저장 완료: {save_path}")
+        timestamp.overlay_time_with_header(save_path)
+
     except Exception as e:
         print(f"URL 접근 실패: {target_url}, 에러: {e}")
-
-    driver.get_screenshot_as_file(save_path)
-
-    print(f"저장 완료: {save_path}")
-    timestamp.overlay_time_with_header(save_path)
-    return
 
 
 def send_today_screenshots():
@@ -120,51 +113,35 @@ def send_today_screenshots():
     )
 
 
-def close_button_if_exists(driver):
+def close_button_if_exists(page):
     try:
-        close_btn = WebDriverWait(driver, 5).until(
-            EC.presence_of_element_located((By.CLASS_NAME, "lst_btn_close"))
-        )
-        close_btn.click()
-        print("Close button clicked!")
-
-        WebDriverWait(driver, 5).until(
-            EC.invisibility_of_element_located((By.CLASS_NAME, "lst_btn_close"))
-        )
-        print("Overlay gone!")
-
-    except TimeoutException:
-        print("No close button found, skipping overlay.")
+        if page.locator(".lst_btn_close").is_visible():
+            page.locator(".lst_btn_close").click()
+            print("닫기 버튼 클릭 완료!")
     except Exception as e:
-        print(f"Other error closing overlay: {e}")
+        print(f"닫기 버튼 처리 실패: {e}")
 
-def handle_cookie_banner(driver):
+
+def handle_cookie_banner(page):
     try:
-        driver.execute_script("""
-            // OneTrust
-            let btn1 = document.querySelector('#onetrust-accept-btn-handler');
-            if (btn1) btn1.click();
+        # OneTrust
+        if page.locator("#onetrust-accept-btn-handler").is_visible():
+            page.locator("#onetrust-accept-btn-handler").click()
+            print("OneTrust 쿠키 배너 클릭!")
 
-            // TrustArc
-            let btn2 = document.querySelector('#truste-consent-button');
-            if (btn2) btn2.click();
-
-            // Cookiebot
-            let btn3 = document.querySelector('#CybotCookiebotDialogBodyLevelButtonAccept');
-            if (btn3) btn3.click();
-
-            // Generic buttons (contains text 'Accept' or '동의' or '허용')
-            let buttons = document.querySelectorAll('button');
-            buttons.forEach(btn => {
-                if (btn.innerText.includes('Accept') || btn.innerText.includes('동의') || btn.innerText.includes('허용')) {
-                    btn.click();
-                }
-            });
-        """)
-        print("Tried to accept all common cookie banners!")
+        # Generic buttons
+        buttons = page.locator("button")
+        count = buttons.count()
+        for i in range(count):
+            btn = buttons.nth(i)
+            text = btn.inner_text().strip()
+            if "Accept" in text or "동의" in text or "허용" in text:
+                btn.click()
+                print(f"쿠키 버튼 클릭: {text}")
+                break
 
     except Exception as e:
-        print(f"Error handling cookie banners: {e}")
+        print(f"쿠키 배너 처리 실패: {e}")
 
 
 if __name__ == "__main__":
