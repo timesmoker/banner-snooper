@@ -75,7 +75,7 @@ def take_screenshot(driver, target_url, save_path, is_landing_page=False):
 
     try:
         driver.get(target_url)
-        time.sleep(5)  # Adjust this sleep time as needed based on your network speed
+        time.sleep(20)  # Adjust this sleep time as needed based on your network speed
 
         if is_landing_page:
             handle_cookie_banner(driver)
