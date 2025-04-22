@@ -21,6 +21,7 @@ def banner_snooper():
     os.makedirs(SAVE_FOLDER, exist_ok=True)
     options = Options()
     options.add_argument("--headless")
+    options.add_argument("--disable-gpu")
     options.add_argument('--no-sandbox')
     options.add_experimental_option("mobileEmulation", {"deviceName": "iPhone 8"})
     driver = webdriver.Chrome(options=options)
