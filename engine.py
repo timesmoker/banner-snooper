@@ -78,7 +78,6 @@ def take_screenshot(page, target_url, save_path, is_landing_page=False):
             close_button_if_exists(page)
 
         page.screenshot(path=save_path)
-        print(f"저장 완료: {save_path}")
         timestamp.overlay_time_with_header(save_path)
 
     except Exception as e:
