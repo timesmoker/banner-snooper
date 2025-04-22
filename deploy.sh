@@ -9,7 +9,7 @@ set +a
 echo "$GHCR_PAT" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin
 
 # 이미지 최신화 (배너 스누퍼만)
-docker pull "$GHCR_REPO:deploy"
+docker pull "$GHCR_REPO:armlatest"
 
 # 기존 컨테이너 있으면 중지 + 삭제
 docker stop banner-snooper || true
@@ -19,4 +19,4 @@ docker rm banner-snooper || true
 docker run -d \
   --name banner-snooper \
   --env-file /home/timesmoker/.envs/.env.banner-snooper \
-  "$GHCR_REPO:deploy"
+  "$GHCR_REPO:armlatest"
