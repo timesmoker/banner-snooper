@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write  # 👈 Needed for GHCR
+      packages: write
 
     steps:
     - name: Checkout code
