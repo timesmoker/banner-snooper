@@ -1,44 +1,26 @@
-name: Deploy to EC2
+name: Build and Push to GHCR
 
 on:
   push:
     branches: [ main ]
-
   workflow_dispatch:
 
-
 jobs:
-  deploy:
+  build-and-push:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write  # 👈 Needed for GHCR
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Set up SSH key
-      uses: webfactory/ssh-agent@v0.8.0
-      with:
-        ssh-private-key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+    - name: Log in to GitHub Container Registry
+      run: echo "${{ secrets.GHCR }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-    - name: Deploy via SSH
+    - name: Build and Push Docker image
       run: |
-        ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-          cd $HOME/workspace/banner-snooper
-          git pull origin main
-
-          docker stop banner-snooper-test || true
-          docker rm banner-snooper-test || true
-          docker rmi banner-snooper || true
-
-          docker build -t banner-snooper .
-
-          docker run \
-            -e DELAY="${{ vars.DELAY }}" \
-            -e GMAIL_ADDR="${{ secrets.GMAIL_ADDR }}" \
-            -e GMAIL_APP_PASSWORD="${{ secrets.GMAIL_APP_PASSWORD }}" \
-            -e TO_ADDR="${{ secrets.GMAIL_ADDR }}" \
-            -p 3000:3000 \
-            --name banner-snooper-test \
-            banner-snooper:latest
-
-        EOF
+        IMAGE_NAME=ghcr.io/${{ github.repository }}/banner-snooper:latest
+        docker build -t $IMAGE_NAME .
+        docker push $IMAGE_NAME

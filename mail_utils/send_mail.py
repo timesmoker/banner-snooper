@@ -1,10 +1,12 @@
 import os
+import logging
 import smtplib
 from email.message import EmailMessage
 import mimetypes
 from typing import Union
-
 from .zip_utils import make_auto_clean_zip, collect_files_from_dir
+
+logger = logging.getLogger(__name__)
 
 def send_mail(
     gmail_addr: str,
@@ -59,7 +61,7 @@ def send_mail(
                         maintype, subtype = mime_type.split("/") if mime_type else ("application", "octet-stream")
                     msg.add_attachment(file_data, maintype=maintype, subtype=subtype, filename=os.path.basename(path))
                 except Exception as e:
-                    print(f"첨부파일 {path} 추가 실패: {e}")
+                    logger.error(f"첨부파일 {path} 추가 실패: {e}")
                     continue
 
     try:
@@ -67,9 +69,9 @@ def send_mail(
             smtp.starttls()
             smtp.login(gmail_addr, gmail_app_password)
             smtp.send_message(msg)
-            print("메일 전송 성공")
+            logger.info("메일 전송 성공")
             return True
 
     except Exception as e:
-        print(f"메일 전송 실패: {e}")
+        logger.error(f"메일 전송 실패: {e}")
         return False

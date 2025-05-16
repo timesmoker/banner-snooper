@@ -1,7 +1,10 @@
+import logging
 import os
 import zipfile
 import io
 
+
+logger = logging.getLogger(__name__)
 
 def make_auto_clean_zip(files: list[str]) -> bytes:
     buffer = io.BytesIO()
@@ -17,7 +20,7 @@ def make_auto_clean_zip(files: list[str]) -> bytes:
         return buffer.read()
 
     except Exception as e:
-        print(f"zip 파일 생성 실패: {e}")
+        logger.error(f"zip 파일 생성 실패: {e}")
         return None
 
 

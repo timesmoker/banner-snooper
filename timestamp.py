@@ -2,12 +2,15 @@ from PIL import Image, ImageDraw, ImageFont
 from datetime import datetime
 import os
 import locale
+import logging
+
+logger = logging.getLogger(__name__)
 
 # 한글 요일 출력을 위해 locale 설정
 try:
     locale.setlocale(locale.LC_TIME, 'ko_KR.UTF-8')
 except locale.Error:
-    print("한글 locale 설정 실패 → 영어로 출력됩니다.")
+    logger.error("한글 locale 설정 실패 → 영어로 출력됩니다.")
 
 def get_font(size=18):
     font_paths = [
@@ -62,7 +65,4 @@ def overlay_time_with_header(image_path):
     draw.text((new_width - date_text_width - 10, date_y), date_text, font=font, fill=text_color)
 
     new_image.paste(original_image, (0, header_height))
-
     new_image.save(image_path)
-
-    print(f"이미지 저장 완료: {image_path}")

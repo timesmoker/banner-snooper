@@ -17,7 +17,7 @@ RUN apt-get update && apt-get install -y \
 RUN echo "ko_KR.UTF-8 UTF-8" >> /etc/locale.gen && \
     locale-gen ko_KR.UTF-8
 
-# 환경변수 설정
+# 로케일 설정용 환경변수 설정
 ENV LANG=ko_KR.UTF-8
 ENV LANGUAGE=ko_KR:ko
 ENV LC_ALL=ko_KR.UTF-8
@@ -38,8 +38,4 @@ COPY . /app
 # 의존성 설치
 RUN pip install --no-cache-dir -r requirements.txt
 
-# entrypoint 실행 권한 부여
-RUN chmod +x /app/entrypoint.sh
-
-# 컨테이너 시작시 실행될 엔트리포인트
 ENTRYPOINT ["/app/entrypoint.sh"]
